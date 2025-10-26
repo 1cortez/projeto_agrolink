@@ -4,28 +4,7 @@ import sqlite3
 
 root = Tk()
 
-class Funcs:
-
-    def conectar_bd(self):
-        self.conn = sqlite3.connect('dados_usuarios.bd')
-        self.cursor = self.conn.cursor()
-    
-    def desconectar(self):
-        self.conn.close(); print('Desconectado!')
-    
-    def montarTabelas(self):
-        self.conectar_bd() #conectar bd
-        self.cursor.execute('''CREATE TABLE IF NOT EXISTS clientes (
-                            usuario VARCHAR(30) PRIMARY KEY,
-                            email VARCHAR(60) NOT NULL,
-                            senha VARCHAR(60) NOT NULL
-                            )
-                            ''')
-        
-        self.conn.commit(); print('Banco criado')
-        self.desconectar()
-
-class TelaLogin(Funcs):
+class TelaLogin:
     def __init__(self):
         self.root = root
         self.tela_main()
@@ -74,15 +53,14 @@ class TelaLogin(Funcs):
         self.frame_1.destroy()  # Remove a tela de login
         Cadastro(self.root)     # Abre a tela de cadastro
 
-class Cadastro(Funcs):
+class Cadastro:
     
     def __init__(self, root):
         self.root = root
         self.tela_cadastro()
         self.frames()
         self.botoes()
-        self.montarTabelas()
-    
+
     def tela_cadastro(self):
         self.root.title('Tela de cadastro')
         self.root.configure(bg='lightgray')

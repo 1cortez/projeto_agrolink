@@ -8,6 +8,4 @@ class RepositorioCliente:
         cursor.execute("SELECT * FROM clientes")
         return cursor.fetchall()
 
-db = BDSqlite().conectar()
-cliente = RepositorioCliente(db)
-clientes = cliente.listarTodos()
+
