@@ -2,6 +2,7 @@ from tkinter import *
 from tkinter import messagebox
 
 from Aplicacao.Logar import Logar
+from Aplicacao.CadastrarNovoCliente import CadastrarNovoCliente
 root = Tk()
 
 class TelaLogin:
@@ -68,6 +69,7 @@ class Cadastro:
         self.tela_cadastro()
         self.frames()
         self.botoes()
+        self.cadastro = CadastrarNovoCliente()
 
     def tela_cadastro(self):
         self.root.title('Tela de cadastro')
@@ -79,7 +81,7 @@ class Cadastro:
         self.frame_2.place(relx=0.5, rely=0.5, anchor=CENTER) # y = altura, x = comprimento
     
     def botoes(self):
-        self.bt_inscrever = Button(self.frame_2, text='INSCREVER-SE', command=self.abrir_login, background='#DEA41D', font=('Arial', 10, 'bold'))
+        self.bt_inscrever = Button(self.frame_2, text='INSCREVER-SE', command=self.cadastrar_novo, background='#DEA41D', font=('Arial', 10, 'bold'))
         self.bt_inscrever.place(relx=0.5, rely=0.85, relwidth=0.3, relheight=0.06, anchor=CENTER)
 
         self.lb_cadastro = Label(self.frame_2, text='Cadastro', font=('Arial', 19, 'bold'), bg='#E3E1E1')
@@ -105,7 +107,15 @@ class Cadastro:
         self.lb_senha = Label(self.frame_2, text='Senha', font=('Arial', 12, 'bold'), background='#E3E1E1')
         self.lb_senha.place(relx=0.21, rely=0.63)
 
-        
+    def cadastrar_novo(self):
+        usuario = self.input_entry.get()
+        senha = self.input_senha.get()
+        email = self.input_email.get()
+        resultado, mensagem = self.cadastro.executar(usuario, email, senha)
+        messagebox.showinfo("Resultado", mensagem)
+        if resultado:
+            self.frame_2.destroy()  # Remove a tela de cadastro
+            TelaLogin()  # Abre a tela de login
 
     def abrir_login(self):
 

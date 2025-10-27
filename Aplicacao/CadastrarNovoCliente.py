@@ -20,6 +20,8 @@ class CadastrarNovoCliente:
         self.repositorio = repositorio
 
     def executar(self, nome: str, email: str, senha: str, renda: Optional[float] = None) -> Tuple[bool, str]:
+        if len(senha) < 4:
+            return False, "Senha deve ter no mínimo 4 caracteres"
         cliente = Cliente(nome, email, senha)
         if renda is not None:
             cliente.definirRenda(renda)
@@ -27,8 +29,4 @@ class CadastrarNovoCliente:
         cliente_id = self.repositorio.criar(
             cliente.nome(), cliente.email(), cliente.senha()
         )
-        print(cliente_id)
         return True, f"Cliente cadastrado com sucesso (id={cliente_id})."
-
-cadastrar = CadastrarNovoCliente()
-cadastrar.executar('Ramon', 'ramon@agro.com', '1234')

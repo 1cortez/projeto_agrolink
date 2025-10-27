@@ -27,6 +27,7 @@ class Cliente:
             raise ValueError('Nome não pode ser vazio')
 
         nome_limpo = nome.strip()
+        nome_limpo = nome_limpo.lower()
         self._nome = nome_limpo[:1].upper() + nome_limpo[1:]
 
     def definirEmail(self, email: str):
