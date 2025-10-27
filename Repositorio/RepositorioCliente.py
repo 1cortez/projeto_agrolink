@@ -1,5 +1,4 @@
-from BDSqlite import BDSqlite
-
+from .BDSqlite import BDSqlite
 
 class RepositorioCliente:
     def __init__(self, db):
