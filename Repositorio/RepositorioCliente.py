@@ -1,4 +1,4 @@
-from .BDSqlite import BDSqlite
+import bcrypt
 
 class RepositorioCliente:
     def __init__(self, db):
@@ -6,9 +6,11 @@ class RepositorioCliente:
 
     def criar(self, nome, email, senha):
         cursor = self.db.cursor()
+        senha_hash = bcrypt.hashpw(senha.encode(), bcrypt.gensalt())
+        senha_hash = senha_hash.decode()
         cursor.execute(
             "INSERT INTO clientes (nome, email, senha) VALUES (?, ?, ?)",
-            (nome, email, senha)
+            (nome, email, senha_hash)
         )
         self.db.commit()
         return cursor.lastrowid

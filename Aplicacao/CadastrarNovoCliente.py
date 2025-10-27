@@ -29,3 +29,6 @@ class CadastrarNovoCliente:
         )
         print(cliente_id)
         return True, f"Cliente cadastrado com sucesso (id={cliente_id})."
+
+cadastrar = CadastrarNovoCliente()
+cadastrar.executar('Ramon', 'ramon@agro.com', '1234')

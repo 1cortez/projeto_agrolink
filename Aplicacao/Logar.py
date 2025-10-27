@@ -4,7 +4,7 @@ from typing import Optional, Tuple
 from Dominio.Cliente import Cliente
 from Repositorio.BDSqlite import BDSqlite
 from Repositorio.RepositorioCliente import RepositorioCliente
-
+import bcrypt
 
 class Logar:
 
@@ -22,7 +22,8 @@ class Logar:
             return False, 'Cliente não encontrado'
 
         _, nome, email_db, senha_db = registro
-        if senha_db != senha:
+
+        if not bcrypt.checkpw(senha.encode(), senha_db.encode()):
             return False, 'Senha inválida'
 
         cliente = Cliente(nome, email_db, senha_db)

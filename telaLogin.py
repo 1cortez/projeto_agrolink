@@ -40,9 +40,11 @@ class TelaLogin:
         # metodo input do tkinter
         self.input_entry = Entry(self.frame_1, highlightbackground='#DEA41D', highlightthickness=1)
         self.input_entry.place(relx=0.2, rely=0.4, relheight=0.06, relwidth=0.6)
+        self.input_entry.insert(0, "ramon@agro.com")
         
         self.input_senha = Entry(self.frame_1, highlightbackground='#DEA41D', highlightthickness=1, show='*')
         self.input_senha.place(relx=0.2, rely=0.55, relheight=0.06, relwidth=0.6)
+        self.input_senha.insert(0, "1234")
 
         self.lb_user = Label(self.frame_1, text='Usuário', font=('Arial', 12, 'bold'), background='#E3E1E1')
         self.lb_user.place(relx=0.21, rely=0.33)
