@@ -23,6 +23,11 @@ class RepositorioCliente:
         cursor.execute("SELECT * FROM clientes WHERE id = ?", (cliente_id,))
         return cursor.fetchone()
 
+    def buscarPorEmail(self, email):
+        cursor = self.db.cursor()
+        cursor.execute("SELECT * FROM clientes WHERE email = ?", (email,))
+        return cursor.fetchone()
+
     def atualizar(self, cliente_id, nome, email, senha):
         cursor = self.db.cursor()
         cursor.execute(
