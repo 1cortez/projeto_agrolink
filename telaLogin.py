@@ -1,7 +1,7 @@
 from tkinter import *
 from tkinter import messagebox
-import sqlite3
 
+from Aplicacao.Logar import Logar
 root = Tk()
 
 class TelaLogin:
@@ -10,6 +10,7 @@ class TelaLogin:
         self.tela_main()
         self.frames()
         self.botoes()
+        self.autenticador = Logar()
         
     def tela_main(self):
         self.root.title('Tela de Login')
@@ -21,7 +22,7 @@ class TelaLogin:
         self.frame_1.place(relx=0.5, rely=0.5, anchor=CENTER) # y = altura, x = comprimento
     
     def botoes(self):
-        self.bt_logar = Button(self.frame_1, text='LOGIN', background='#DEA41D', font=('Arial', 9, 'bold'))
+        self.bt_logar = Button(self.frame_1, text='LOGIN', background='#DEA41D', font=('Arial', 9, 'bold'), command=self.tentativa_login)
         self.bt_logar.place(relx=0.2, rely=0.65, relwidth=0.6, relheight=0.06)
 
         self.bt_cadastrar = Button(self.frame_1, text='Cadastre-se', font=('Arial', 10, 'bold'), command=self.abrir_cadastro)
@@ -53,6 +54,11 @@ class TelaLogin:
         self.frame_1.destroy()  # Remove a tela de login
         Cadastro(self.root)     # Abre a tela de cadastro
 
+    def tentativa_login(self):
+        email = self.input_entry.get()
+        senha = self.input_senha.get()
+        resultado,mensagem = self.autenticador.executar(email, senha)
+        messagebox.showinfo("Resultado", mensagem)
 class Cadastro:
     
     def __init__(self, root):
