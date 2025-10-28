@@ -20,6 +20,10 @@ class CadastrarNovoCliente:
         self.repositorio = repositorio
 
     def executar(self, nome: str, email: str, senha: str, renda: Optional[float] = None) -> Tuple[bool, str]:
+        # Verificar se o email existe
+        buscarUsuario = self.repositorio.buscarPorEmail(email)
+        if len(buscarUsuario) > 0 :
+            return False, "O email já está em uso"
         if len(senha) < 4:
             return False, "Senha deve ter no mínimo 4 caracteres"
         cliente = Cliente(nome, email, senha)
