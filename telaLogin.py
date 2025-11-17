@@ -1,10 +1,13 @@
 from tkinter import *
 from tkinter import messagebox
+from pathlib import Path
 from PIL import Image, ImageTk
 
 
 from Aplicacao.Logar import Logar
+
 root = Tk()
+LOGO_PATH = Path(__file__).resolve().parent / 'logo.png'
 
 class TelaLogin:
     def __init__(self):
@@ -24,7 +27,7 @@ class TelaLogin:
         self.frame_1 = Frame(self.root, bg='#014040', width=500, height=450, highlightbackground='#BFBFBF', highlightthickness=3)
         self.frame_1.place(relx=0.5, rely=0.5, anchor=CENTER) # y = altura, x = comprimento
         # importando a logo do app
-        imagem = Image.open(r"C:\Users\guilh\Downloads\AGRO LINK SEM FUNDO.png")
+        imagem = Image.open(LOGO_PATH)
         imagem = imagem.resize((160, 160), Image.Resampling.LANCZOS)  # largura x altura
         self.imagem_tk = ImageTk.PhotoImage(imagem) 
        
