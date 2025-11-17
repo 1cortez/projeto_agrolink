@@ -1,5 +1,4 @@
 Telas
-- Dashboard Canva
 - Solicitar Empréstimo ( Renda, Nome Completo, Endereço, Objetivo em Select com Dropdown [Ver no projeto Atividades Financiadas com crédito rural])
 - Alterar tela de cadastro para incluir select pra definir quem pode usar crédito rural
 - Termos de acordo de acesso ao sistema
@@ -9,3 +8,10 @@ Regras
 - Classe de empréstimo e de cálculo
 - Alterar CadastrarNovoCliente para refletir quem pode usar crédito rural
 - Tabela de Termos e Classe de termos
+
+
+Implementar quantia de empréstimo no front
+Botão de solicitar
+Bug do login
+Tela de Histórico de login
+Menu (Histórico, Solicitar Novo, Sair)
