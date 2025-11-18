@@ -1,17 +1,19 @@
 class Emprestimo:
 
-    def __init__(self, nome, endereco, renda, quantia_solicitada, identificador=None):
+    def __init__(self, nome, endereco, renda, quantia_solicitada, cliente_id, identificador=None):
         self._id = None
         self._nome = ''
         self._endereco = ''
         self._renda = 0
         self._quantia_solicitada = 0
+        self._cliente_id = None
 
         self.definirId(identificador)
         self.definirNome(nome)
         self.definirEndereco(endereco)
         self.definirRenda(renda)
         self.definirQuantiaSolicitada(quantia_solicitada)
+        self.definirClienteId(cliente_id)
 
     def id(self):
         return self._id
@@ -27,6 +29,9 @@ class Emprestimo:
 
     def quantiaSolicitada(self):
         return self._quantia_solicitada
+
+    def clienteId(self):
+        return self._cliente_id
 
     def definirId(self, identificador):
         if identificador is None:
@@ -65,3 +70,10 @@ class Emprestimo:
             raise ValueError('Quantia solicitada deve ser positiva')
 
         self._quantia_solicitada = quantia_int
+
+    def definirClienteId(self, cliente_id):
+        cliente_int = int(cliente_id)
+        if cliente_int <= 0:
+            raise ValueError('Cliente inválido')
+
+        self._cliente_id = cliente_int

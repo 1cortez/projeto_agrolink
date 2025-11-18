@@ -19,9 +19,9 @@ class SolicitarNovoEmprestimo:
             repositorio = RepositorioEmprestimo(conexao)
         self.repositorio = repositorio
 
-    def executar(self, nome: str, endereco: str, renda, quantia_solicitada) -> Tuple[bool, str]:
+    def executar(self, nome: str, endereco: str, renda, quantia_solicitada, cliente_id) -> Tuple[bool, str]:
         try:
-            emprestimo = Emprestimo(nome, endereco, renda, quantia_solicitada)
+            emprestimo = Emprestimo(nome, endereco, renda, quantia_solicitada, cliente_id)
         except ValueError as erro:
             return False, str(erro)
 
@@ -29,6 +29,7 @@ class SolicitarNovoEmprestimo:
             emprestimo.nome(),
             emprestimo.endereco(),
             emprestimo.renda(),
-            emprestimo.quantiaSolicitada()
+            emprestimo.quantiaSolicitada(),
+            emprestimo.clienteId()
         )
         return True, f"Empréstimo solicitado com sucesso (id={emprestimo_id})."
