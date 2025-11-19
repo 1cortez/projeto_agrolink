@@ -1,12 +1,15 @@
 class Emprestimo:
 
-    def __init__(self, nome, endereco, renda, quantia_solicitada, cliente_id, identificador=None):
+    CLASSIFICACOES_VALIDAS = ("pequeno", "medio", "grande")
+
+    def __init__(self, nome, endereco, renda, quantia_solicitada, cliente_id, classificacao_produtor, identificador=None):
         self._id = None
         self._nome = ''
         self._endereco = ''
         self._renda = 0
         self._quantia_solicitada = 0
         self._cliente_id = None
+        self._classificacao_produtor = ''
 
         self.definirId(identificador)
         self.definirNome(nome)
@@ -14,6 +17,7 @@ class Emprestimo:
         self.definirRenda(renda)
         self.definirQuantiaSolicitada(quantia_solicitada)
         self.definirClienteId(cliente_id)
+        self.definirClassificacaoProdutor(classificacao_produtor)
 
     def id(self):
         return self._id
@@ -32,6 +36,9 @@ class Emprestimo:
 
     def clienteId(self):
         return self._cliente_id
+
+    def classificacaoProdutor(self):
+        return self._classificacao_produtor
 
     def definirId(self, identificador):
         if identificador is None:
@@ -77,3 +84,13 @@ class Emprestimo:
             raise ValueError('Cliente inválido')
 
         self._cliente_id = cliente_int
+
+    def definirClassificacaoProdutor(self, classificacao):
+        if not classificacao or not classificacao.strip():
+            raise ValueError('Classificação do produtor é obrigatória')
+
+        normalizado = classificacao.strip().lower()
+        if normalizado not in self.CLASSIFICACOES_VALIDAS:
+            raise ValueError('Classificação inválida. Utilize pequeno, medio ou grande')
+
+        self._classificacao_produtor = normalizado
