@@ -4,7 +4,7 @@ from pathlib import Path
 from typing import Optional
 from PIL import Image, ImageTk
 
-
+from Aplicacao.ListarSolicitacoes import ListarSolicitacoes
 from Aplicacao.Logar import Logar
 from Aplicacao.SolicitarNovoEmprestimo import SolicitarNovoEmprestimo
 
@@ -387,6 +387,9 @@ class Historico:
         self.sessao = sessao_ativa
         self.autenticador = Logar()
         self.frame_5 = None
+        self.sessao = sessao_ativa
+        self.buscador_historico =  ListarSolicitacoes()
+        self.historico = self.buscador_historico.executar(sessao) # O retorno da classe tem a estrutura return Bool, mensagem, [dados]
 
         if not self._sessao_valida():
             return
