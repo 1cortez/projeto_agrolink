@@ -8,18 +8,34 @@ if BASE_DIR not in sys.path:
 
 from Dominio.Emprestimo import Emprestimo
 from Repositorio.BDSqlite import BDSqlite
+from Repositorio.RepositorioCliente import RepositorioCliente
 from Repositorio.RepositorioEmprestimo import RepositorioEmprestimo
 
 
 class SolicitarNovoEmprestimo:
 
-    def __init__(self, repositorio: Optional[RepositorioEmprestimo] = None):
-        if repositorio is None:
+    def __init__(
+        self,
+        repositorio: Optional[RepositorioEmprestimo] = None,
+        repositorio_clientes: Optional[RepositorioCliente] = None
+    ):
+        conexao = None
+        if repositorio is None or repositorio_clientes is None:
             conexao = BDSqlite().conectar()
-            repositorio = RepositorioEmprestimo(conexao)
-        self.repositorio = repositorio
 
-    def executar(self, nome: str, endereco: str, renda, quantia_solicitada, cliente_id, classificacao_produtor: str) -> Tuple[bool, str]:
+        if repositorio is None:
+            repositorio = RepositorioEmprestimo(conexao)
+        if repositorio_clientes is None:
+            repositorio_clientes = RepositorioCliente(conexao)
+
+        self.repositorio = repositorio
+        self.repositorio_clientes = repositorio_clientes
+
+    def executar(self, nome: str, endereco: str, renda, quantia_solicitada, token: Optional[str], classificacao_produtor: str) -> Tuple[bool, str]:
+        cliente_id = self._obter_cliente_id_por_token(token)
+        if cliente_id is None:
+            return False, 'Sessão inválida. Faça login novamente.'
+
         try:
             emprestimo = Emprestimo(nome, endereco, renda, quantia_solicitada, cliente_id, classificacao_produtor)
         except ValueError as erro:
@@ -34,3 +50,20 @@ class SolicitarNovoEmprestimo:
             emprestimo.classificacaoProdutor()
         )
         return True, f"Empréstimo solicitado com sucesso (id={emprestimo_id})."
+
+    def _obter_cliente_id_por_token(self, token: Optional[str]) -> Optional[int]:
+        if token is None:
+            return None
+
+        token_limpo = token.strip()
+        if not token_limpo:
+            return None
+
+        registro = self.repositorio_clientes.buscarPorToken(token_limpo)
+        if registro is None:
+            return None
+
+        try:
+            return int(registro[0])
+        except (TypeError, ValueError):
+            return None

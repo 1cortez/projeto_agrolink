@@ -16,6 +16,14 @@ class RepositorioEmprestimo:
         cursor.execute("SELECT * FROM emprestimos")
         return cursor.fetchall()
 
+    def listarPorCliente(self, cliente_id):
+        cursor = self.db.cursor()
+        cursor.execute(
+            "SELECT * FROM emprestimos WHERE id_cliente = ? ORDER BY id DESC",
+            (cliente_id,)
+        )
+        return cursor.fetchall()
+
     def buscarPorId(self, emprestimo_id):
         cursor = self.db.cursor()
         cursor.execute("SELECT * FROM emprestimos WHERE id = ?", (emprestimo_id,))

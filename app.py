@@ -1,21 +1,46 @@
 from tkinter import *
 from tkinter import messagebox
 from pathlib import Path
+from typing import Optional
 from PIL import Image, ImageTk
 
 
 from Aplicacao.Logar import Logar
+from Aplicacao.SolicitarNovoEmprestimo import SolicitarNovoEmprestimo
 
 root = Tk()
 LOGO_PATH = Path(__file__).resolve().parent / 'logo.png'
 
-class TelaLogin:
+
+class SessaoAplicacao:
     def __init__(self):
+        self.cliente_id: Optional[int] = None
+        self.token: Optional[str] = None
+
+    def iniciar(self, cliente_id: int, token: str):
+        self.cliente_id = cliente_id
+        self.token = token
+
+    def ativa(self) -> bool:
+        return self.cliente_id is not None and self.token is not None
+
+    def limpar(self):
+        self.cliente_id = None
+        self.token = None
+
+
+sessao = SessaoAplicacao()
+
+
+class TelaLogin:
+    def __init__(self, sessao_ativa: Optional[SessaoAplicacao] = None):
         self.root = root
+        self.sessao = sessao_ativa or sessao
+        self.autenticador = Logar()
+        self.sessao.limpar()
         self.tela_main()
         self.frames()
         self.botoes()
-        self.autenticador = Logar()
         
     def tela_main(self):
         self.root.title('Tela de Login')
@@ -74,10 +99,19 @@ class TelaLogin:
     def tentativa_login(self):
         email = self.input_entry.get()
         senha = self.input_senha.get()
-        resultado,mensagem = self.autenticador.executar(email, senha)
-        messagebox.showinfo("Resultado", mensagem) 
+        sucesso, mensagem, cliente_id, token = self.autenticador.executar(email, senha)
+        if not sucesso:
+            messagebox.showerror("Erro", mensagem)
+            return
+
+        if cliente_id is None or token is None:
+            messagebox.showerror("Erro", "Não foi possível iniciar a sessão.")
+            return
+
+        self.sessao.iniciar(cliente_id, token)
+        messagebox.showinfo("Resultado", mensagem)
         self.frame_1.destroy()  # remove a tela de login
-        Contrato(self.root)  
+        Contrato(self.root, self.sessao)  
 
 
 class Cadastro:
@@ -138,8 +172,17 @@ class Cadastro:
         TelaLogin()
     
 class Contrato:
-    def __init__(self, root):
+    def __init__(self, root, sessao_ativa: SessaoAplicacao):
         self.root = root
+        self.sessao = sessao_ativa
+        self.autenticador = Logar()
+        self.solicitador = SolicitarNovoEmprestimo()
+        self.frame_3 = None
+        self.frame_4 = None
+
+        if not self._sessao_valida():
+            return
+
         self.tela_contrato()
         self.frames()
         self.botoes()
@@ -203,7 +246,14 @@ class Contrato:
         self.popup_2.place(relx=0.3, rely=0.6, relheight=0.06, relwidth=0.3, anchor=CENTER)
 
         # botoes
-        self.bt_solicitar = Button(self.frame_3, text='SOLICITAR', background='#022326', font=('Arial', 9, 'bold'), fg='white')
+        self.bt_solicitar = Button(
+            self.frame_3,
+            text='SOLICITAR',
+            background='#022326',
+            font=('Arial', 9, 'bold'),
+            fg='white',
+            command=self.solicitar_emprestimo
+        )
         self.bt_solicitar.place(relx=0.5, rely=0.8, relwidth=0.3, relheight=0.06, anchor=CENTER)
 
         self.bt_voltar = Button(self.frame_3, text='VOLTAR', background='#022326', font=('Arial', 9, 'bold'), fg='white', command=self.voltar_login)
@@ -217,24 +267,130 @@ class Contrato:
 
         self.bt_encerrar = Button(self.frame_4, text='SAIR', background='#022326', font=('Arial', 9, 'bold'), fg='white', command=self.encerrar)
         self.bt_encerrar.place(relx=0.83, rely=0.5, relwidth=0.3, relheight=0.3, anchor=CENTER)
-    
+
+    def solicitar_emprestimo(self):
+        if not self._sessao_valida():
+            return
+
+        nome = self.input_nome.get().strip()
+        endereco = self.input_endereco.get().strip()
+        renda = self.input_renda.get()
+        valor_opcao = self.tipvar.get()
+        classificacao_opcao = self.tipvar_2.get()
+
+        if not nome:
+            messagebox.showerror('Erro', 'Informe o nome do solicitante.')
+            return
+        if not endereco:
+            messagebox.showerror('Erro', 'Informe o endereço do cliente.')
+            return
+        if valor_opcao == 'Opções':
+            messagebox.showerror('Erro', 'Selecione o valor do empréstimo.')
+            return
+        if classificacao_opcao == 'Opções':
+            messagebox.showerror('Erro', 'Selecione a classificação do produtor.')
+            return
+
+        try:
+            renda_normalizada = self._extrair_inteiro(renda, 'Renda anual')
+            valor_normalizado = self._extrair_inteiro(valor_opcao, 'Valor do empréstimo')
+            classificacao_normalizada = self._normalizar_classificacao(classificacao_opcao)
+        except ValueError as erro:
+            messagebox.showerror('Erro', str(erro))
+            return
+
+        sucesso, mensagem = self.solicitador.executar(
+            nome,
+            endereco,
+            renda_normalizada,
+            valor_normalizado,
+            self.sessao.token,
+            classificacao_normalizada
+        )
+
+        if sucesso:
+            messagebox.showinfo('Empréstimo solicitado', mensagem)
+            self._limpar_formulario()
+        else:
+            messagebox.showerror('Erro', mensagem)
+
+    def _extrair_inteiro(self, valor_textual: str, nome_do_campo: str) -> int:
+        texto = valor_textual or ''
+        apenas_digitos = ''.join(ch for ch in texto if ch.isdigit())
+        if not apenas_digitos:
+            raise ValueError(f'{nome_do_campo} é obrigatório.')
+        return int(apenas_digitos)
+
+    def _normalizar_classificacao(self, opcao: str) -> str:
+        normalizado = opcao.strip().lower()
+        if normalizado.startswith('pequeno'):
+            return 'pequeno'
+        if normalizado.startswith('médio') or normalizado.startswith('medio'):
+            return 'medio'
+        if normalizado.startswith('grande'):
+            return 'grande'
+        raise ValueError('Classificação do produtor inválida.')
+
+    def _limpar_formulario(self):
+        self.input_nome.delete(0, END)
+        self.input_renda.delete(0, END)
+        self.input_endereco.delete(0, END)
+        self.tipvar.set('Opções')
+        self.tipvar_2.set('Opções')
+
     def voltar_login(self):
-        self.frame_3.destroy()
-        self.frame_4.destroy()
-        TelaLogin()
+        self._destruir_frames()
+        self.autenticador.encerrar_sessao(self.sessao.token)
+        self.sessao.limpar()
+        TelaLogin(self.sessao)
     
     def abrir_historico(self):
-        self.frame_3.destroy()
-        self.frame_4.destroy()
-        Historico(self.root)
+        if not self._sessao_valida():
+            return
+        self._destruir_frames()
+        Historico(self.root, self.sessao)
     
     def encerrar(self):
+        self.autenticador.encerrar_sessao(self.sessao.token)
+        self.sessao.limpar()
         self.root.destroy()
+
+    def _destruir_frames(self):
+        if self.frame_3 is not None:
+            self.frame_3.destroy()
+            self.frame_3 = None
+        if self.frame_4 is not None:
+            self.frame_4.destroy()
+            self.frame_4 = None
+
+    def _sessao_valida(self) -> bool:
+        if not self.sessao.ativa():
+            messagebox.showwarning('Sessão encerrada', 'Faça login novamente para continuar.')
+            self._destruir_frames()
+            TelaLogin(self.sessao)
+            return False
+
+        registro = self.autenticador.buscar_cliente_por_token(self.sessao.token)
+        if registro is None:
+            messagebox.showwarning('Sessão encerrada', 'Faça login novamente para continuar.')
+            self.sessao.limpar()
+            self._destruir_frames()
+            TelaLogin(self.sessao)
+            return False
+
+        return True
 
 class Historico:
 
-    def __init__(self, root):
+    def __init__(self, root, sessao_ativa: SessaoAplicacao):
         self.root = root
+        self.sessao = sessao_ativa
+        self.autenticador = Logar()
+        self.frame_5 = None
+
+        if not self._sessao_valida():
+            return
+
         self.tela_historico()
         self.frames()
         self.botoes()
@@ -260,8 +416,31 @@ class Historico:
         self.bt_voltar.place(relx=0.5, rely=0.88, relwidth=0.3, relheight=0.06, anchor=CENTER)
 
     def voltar_login(self):
-        self.frame_5.destroy()
-        Contrato(self.root)
+        if self.frame_5 is not None:
+            self.frame_5.destroy()
+            self.frame_5 = None
+        Contrato(self.root, self.sessao)
+
+    def _sessao_valida(self) -> bool:
+        if not self.sessao.ativa():
+            messagebox.showwarning('Sessão encerrada', 'Faça login novamente para continuar.')
+            if self.frame_5 is not None:
+                self.frame_5.destroy()
+                self.frame_5 = None
+            TelaLogin(self.sessao)
+            return False
+
+        registro = self.autenticador.buscar_cliente_por_token(self.sessao.token)
+        if registro is None:
+            messagebox.showwarning('Sessão encerrada', 'Faça login novamente para continuar.')
+            self.sessao.limpar()
+            if self.frame_5 is not None:
+                self.frame_5.destroy()
+                self.frame_5 = None
+            TelaLogin(self.sessao)
+            return False
+
+        return True
 
 
 TelaLogin()
