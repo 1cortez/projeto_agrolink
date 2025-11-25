@@ -37,7 +37,31 @@ class SolicitarNovoEmprestimo:
             return False, 'Sessão inválida. Faça login novamente.'
 
         try:
-            emprestimo = Emprestimo(nome, endereco, renda, quantia_solicitada, cliente_id, classificacao_produtor)
+            renda_normalizada = int(renda)
+        except (TypeError, ValueError):
+            return False, 'Renda inválida.'
+
+        classificacao_normalizada = (classificacao_produtor or '').strip().lower()
+
+        if classificacao_normalizada == 'pequeno':
+            if renda_normalizada >= 500_000:
+                return False, 'Renda incompatível para classificação pequeno.'
+        elif classificacao_normalizada == 'medio':
+            if renda_normalizada < 500_000 or renda_normalizada > 3_000_000:
+                return False, 'Renda incompatível para classificação médio.'
+        elif classificacao_normalizada == 'grande':
+            if renda_normalizada <= 3_000_000:
+                return False, 'Renda incompatível para classificação grande.'
+
+        try:
+            emprestimo = Emprestimo(
+                nome,
+                endereco,
+                renda_normalizada,
+                quantia_solicitada,
+                cliente_id,
+                classificacao_normalizada or classificacao_produtor
+            )
         except ValueError as erro:
             return False, str(erro)
 
